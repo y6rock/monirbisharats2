@@ -135,7 +135,24 @@ CREATE TABLE settings (
 );
 ```
 
-### 4. Start the Servers
+### 4. Environment Configuration
+
+**Create the .env file:**
+```bash
+cd backend
+cp env.example .env
+```
+
+**Edit the .env file** with your email credentials (optional - for contact form and password reset):
+```bash
+# Email Configuration for Contact Form
+EMAIL_USER=your_email@outlook.com
+EMAIL_PASS=your_email_password
+```
+
+**Note:** The application will work without email configuration, but contact form and password reset features will be limited.
+
+### 5. Start the Servers
 
 **Terminal 1 - Backend:**
 ```bash
@@ -151,13 +168,13 @@ npm start
 ```
 The frontend will run on `http://localhost:3000`
 
-### 5. Access the Application
+### 6. Access the Application
 
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:3001
 - **phpMyAdmin**: http://localhost/phpmyadmin (if installed)
 
-### 6. Default Login Credentials
+### 7. Default Login Credentials
 
 You can create an admin user by registering through the application, or insert directly into the database:
 
