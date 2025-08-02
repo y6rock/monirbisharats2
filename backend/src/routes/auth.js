@@ -102,9 +102,20 @@ router.post('/forgot-password', async (req, res) => {
 
         await db.query('UPDATE users SET resetPasswordToken = ?, resetPasswordExpires = ? WHERE user_id = ?', [resetToken, resetPasswordExpires, user.user_id]);
 
+        // Check if email credentials are configured
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+            console.log('Email credentials not configured. Skipping email send.');
+            // For development, we'll return success but log the reset token
+            console.log(`Password reset token for ${email}: ${resetToken}`);
+            return res.status(200).json({ 
+                message: 'Password reset token generated. Check server logs for token (email not configured).',
+                token: resetToken // Only for development
+            });
+        }
+
         // Send the email
         const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
+            host: 'smtp-mail.outlook.com',
             port: 587,
             secure: false, // true for 465, false for other ports
             auth: {
@@ -115,7 +126,7 @@ router.post('/forgot-password', async (req, res) => {
 
         const mailOptions = {
             to: user.email,
-            from: 'passwordreset@techstock.com',
+            from: process.env.EMAIL_USER,
             subject: 'TechStock Password Reset',
             text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n
                    Please click on the following link, or paste this into your browser to complete the process:\n\n
@@ -128,7 +139,17 @@ router.post('/forgot-password', async (req, res) => {
 
     } catch (err) {
         console.error('Forgot password error:', err);
-        res.status(500).json({ message: 'Server error' });
+        
+        // Handle email-specific errors gracefully
+        if (err.code === 'EAUTH' || err.message.includes('Authentication unsuccessful') || err.message.includes('basic authentication is disabled')) {
+            console.log('Email authentication failed. Outlook requires OAuth2 or App Password.');
+            return res.status(200).json({ 
+                message: 'Password reset initiated. Email service requires OAuth2 configuration.',
+                error: 'Email service unavailable - requires OAuth2 setup'
+            });
+        }
+        
+        res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
 

@@ -8,9 +8,9 @@ const dbSingleton = {
     if (!pool) {
       pool = mysql.createPool({
         host: 'localhost',
-        user: 'root',
-        port: 3310,
-        password: '',
+        user: 'techstock',
+        port: 3306,
+        password: 'Mb123456!@#',
         database: 'techstock',
         waitForConnections: true,
         connectionLimit: 10,

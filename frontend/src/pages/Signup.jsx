@@ -35,7 +35,7 @@ function Signup() {
     }
 
     try {
-      const res = await axios.post('/api/register', {
+      const res = await axios.post('/api/auth/register', {
         name: form.name + ' ' + form.lastName,
         email: form.email,
         phone: form.phone,

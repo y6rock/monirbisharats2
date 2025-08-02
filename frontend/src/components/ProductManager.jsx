@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import ProductModal from './ProductModal';
 import { useSettings } from '../context/SettingsContext';
 
@@ -105,6 +106,8 @@ function ProductManager() {
     e.preventDefault();
     console.log('handleSubmit triggered');
     
+    const token = localStorage.getItem('token');
+    
     // Basic validation
     if (!form.name || !form.description || !form.price || !form.stock || (!form.image && !imageFile)) {
       setMessage('Please fill in all required fields, and provide an image file or URL.');
@@ -206,6 +209,8 @@ function ProductManager() {
   const handleUpdateProduct = async (e) => {
     e.preventDefault();
     
+    const token = localStorage.getItem('token');
+    
     // Basic validation
     if (!form.name || !form.description || !form.price || !form.stock || (!form.image && !imageFile)) {
       setMessage('Please fill in all required fields, and provide an image file or URL.');
@@ -270,6 +275,7 @@ function ProductManager() {
   };
 
   const handleDeleteProduct = async (productId) => {
+    const token = localStorage.getItem('token');
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         const res = await axios.delete(`/api/products/${productId}`, {
@@ -316,19 +322,17 @@ function ProductManager() {
   const handleSuccess = async () => {
     handleCloseModal();
     try {
+      const token = localStorage.getItem('token');
       const headers = { Authorization: `Bearer ${token}` };
-      const [productsRes, suppliersRes, categoriesRes, settingsRes, currenciesRes] = await Promise.all([
+      const [productsRes, suppliersRes, categoriesRes] = await Promise.all([
         axios.get('/api/products'),
         axios.get('/api/suppliers', { headers }),
         axios.get('/api/categories', { headers }),
-        axios.get('/api/settings'),
-        axios.get('/api/currencies'),
       ]);
       setProducts(productsRes.data);
       setSuppliers(suppliersRes.data);
       setCategories(categoriesRes.data);
-      setSettings(settingsRes.data);
-      setCurrencies(currenciesRes.data);
+      setMessage('Product added successfully!');
     } catch (err) {
       console.error('Error fetching product data after success:', err);
       setMessage('Product was added, but failed to refresh the list.');

@@ -16,4 +16,28 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
     }
 });
 
+// Add new supplier
+router.post('/', authenticateToken, requireAdmin, async (req, res) => {
+    try {
+        const { name, contact } = req.body;
+        
+        if (!name) {
+            return res.status(400).json({ message: 'Supplier name is required' });
+        }
+
+        const [result] = await db.query(
+            'INSERT INTO suppliers (name, contact) VALUES (?, ?)',
+            [name, contact || null]
+        );
+
+        res.status(201).json({ 
+            message: 'Supplier added successfully',
+            supplier_id: result.insertId 
+        });
+    } catch (err) {
+        console.error("Error adding supplier:", err);
+        res.status(500).json({ message: "Failed to add supplier" });
+    }
+});
+
 module.exports = router; 
